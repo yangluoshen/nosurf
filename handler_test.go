@@ -403,3 +403,26 @@ func TestAddsVaryCookieHeader(t *testing.T) {
 		t.Errorf("CSRFHandler didn't add a `Vary: Cookie` header.")
 	}
 }
+
+func TestCustomCookieName(t *testing.T) {
+	hand := New(http.HandlerFunc(succHand))
+
+	if hand.getCookieName() != CookieName {
+		t.Errorf("No base cookie set, expected CookieName to be %s, was %s", CookieName, hand.getCookieName())
+	}
+
+	hand.SetBaseCookie(http.Cookie{})
+
+	if hand.getCookieName() != CookieName {
+		t.Errorf("Base cookie with empty name set, expected CookieName to be %s, was %s", CookieName, hand.getCookieName())
+	}
+
+	customCookieName := "my_custom_cookie"
+	hand.SetBaseCookie(http.Cookie{
+		Name: customCookieName,
+	})
+
+	if hand.getCookieName() != customCookieName {
+		t.Errorf("Base cookie with name %s was set, but CookieName was %s instead", customCookieName, hand.getCookieName())
+	}
+}

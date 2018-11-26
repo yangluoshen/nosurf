@@ -112,7 +112,7 @@ func (h *CSRFHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var realToken []byte
 
-	tokenCookie, err := r.Cookie(CookieName)
+	tokenCookie, err := r.Cookie(h.getCookieName())
 	if err == nil {
 		realToken = b64decode(tokenCookie.Value)
 	}
@@ -198,7 +198,7 @@ func (h *CSRFHandler) setTokenCookie(w http.ResponseWriter, r *http.Request, tok
 	ctxSetToken(r, token)
 
 	cookie := h.baseCookie
-	cookie.Name = CookieName
+	cookie.Name = h.getCookieName()
 	cookie.Value = b64encode(token)
 
 	http.SetCookie(w, &cookie)
@@ -215,4 +215,12 @@ func (h *CSRFHandler) SetFailureHandler(handler http.Handler) {
 // This way you can specify the Domain, Path, HttpOnly, Secure, etc.
 func (h *CSRFHandler) SetBaseCookie(cookie http.Cookie) {
 	h.baseCookie = cookie
+}
+
+func (h CSRFHandler) getCookieName() string {
+	if h.baseCookie.Name != "" {
+		return h.baseCookie.Name
+	}
+
+	return CookieName
 }
